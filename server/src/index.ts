@@ -6,6 +6,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import helmet from 'helmet';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
+import cookieParser from 'cookie-parser';
 
 
 dotenv.config();
@@ -20,7 +21,7 @@ connectDB();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-
+app.use(cookieParser());
 const io = new Server(server,{
     cors: {
         origin: "*",
