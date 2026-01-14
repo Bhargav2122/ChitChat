@@ -1,23 +1,18 @@
 import { email, z } from 'zod';
 
-export const registerInput = z.object({
+export const registerSchema = z.object({
     fullname: z.string().trim().min(3, "Name is too short"),
     email: z.email("Invalid email"),
-    password: z.string().min(6, "Password must be 6 character")
+    password: z.string().min(6, "Password must be 6 character"),
+    avatar:z.string().optional(),
 });
 
-export const loginInput = z.object({
+export const loginSchema = z.object({
     email: z.email("Invalid email"),
-    password: z.string().min(6, "Password must be 6 character")
-})
-
-export const googleAuthInput = z.object({
-    googleId: z.string(),
-    fullname: z.string().trim().min(3, "Name is too short"),
-    email: z.email("Invalid email"),
+    password: z.string().min(6, "Password must be 6 character"),
+     avatar:z.string().optional(),
 })
 
 
-export type registerSchema = z.infer< typeof registerInput>;
-export type loginSchema = z.infer<typeof loginInput>;
-export type googleAuthSchema = z.infer<typeof googleAuthInput>;
+export type registerInput = z.infer< typeof registerSchema>;
+export type loginInput = z.infer<typeof loginSchema>;

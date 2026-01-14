@@ -6,21 +6,21 @@ import jwt from 'jsonwebtoken'
 import { Socket } from "socket.io";
 import { parse } from "cookie";
 
-export const verifyToken = (socket: Socket, next:NextFunction) => {
+export const verifyToken = (socket: Socket, next: (err?:Error) => void) => {
     try{
         const cookieHeader = socket.handshake.headers.cookie;
         if(!cookieHeader) {
-            return next(new ApiError(401, "Authentication required") )
+            return next(new Error("Token invalid"))
         }
         const cookies = parse(cookieHeader);
         const token = cookies.token;
         if(!token) {
-            return next(new ApiError(401, "Token missing or invalid"));
+            return next(new Error("Token missing"))
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as JwtPayload;
         socket.data.user = decoded;
         next();
     } catch {
-        next (new ApiError(401, "Invalid Token or Expired"))
+        return next (new Error("Invalid Token or Expired"))
     }
 };

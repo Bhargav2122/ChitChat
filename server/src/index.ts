@@ -7,7 +7,7 @@ import connectDB from './config/db.js';
 import helmet from 'helmet';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import cookieParser from 'cookie-parser';
-
+import userRouter from './routes/userRoute.js'
 
 dotenv.config();
 
@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
     })
     
 })
-
+app.use('/api/auth', userRouter);
 
 app.use(errorMiddleware);
 server.listen(port, () =>{
