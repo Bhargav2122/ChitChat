@@ -1,46 +1,40 @@
 import express from 'express';
-import dotenv from 'dotenv'
-import { createServer } from 'node:http';
-import { Server } from 'socket.io'
+import type { Request, Response } from 'express';
 import cors from 'cors';
-import connectDB from './config/db.js';
-import helmet from 'helmet';
-import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import cookieParser from 'cookie-parser';
-import userRouter from './routes/userRoute.js'
-
+import connectDB from './config/db.js';
+import dotenv from 'dotenv';
+import http from 'node:http'
+import { Server } from 'socket.io';
+import authRoutes from './routes/authRoutes.js';
+import { errorMiddleware } from './middleware/errorMiddleware.js';
 dotenv.config();
 
-const app = express();
-const server = createServer(app);
 const port = process.env.PORT || 2100;
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
-//mongodb connection
+
+
+
+app.use(cors({
+    origin:"*",
+    credentials: true,
+}));
+
+app.use(cookieParser());
+app.use(express.json());
+
 connectDB();
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(cookieParser());
-const io = new Server(server,{
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
+app.use('/api/auth', authRoutes);
 
-io.on('connection', (socket) => {
-    console.log("a user connected: ",socket.id);
-    socket.on('receive-message', (msg)=> {
-        console.log('message: ' +msg);
-        io.emit('receive-message', msg);
-        
-    })
-    
-})
-app.use('/api/auth', userRouter);
 
 app.use(errorMiddleware);
+app.get('/', (req: Request,res: Response) => {
+        res.send('hello')
+})
 server.listen(port, () =>{
-    console.log(`Server is listening on the port ${port}`)
+    console.log(`Server is listening on: ${port}`)
 })

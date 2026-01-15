@@ -1,60 +1,63 @@
-import { HydratedDocument, Schema, model } from "mongoose";
-import { userType } from "../types/userType.js";
-import bcrypt from "bcryptjs";
-import { NextFunction } from "express";
+import bcrypt, { compare } from 'bcryptjs';
+import {Document, Schema, model } from 'mongoose';
 
-const userSchema = new Schema<userType>({
-    fullname:{
-        type: String,
-        trim: true,
+export interface UserType extends Document{
+    name:string,
+    email:string,
+    bio:string,
+    password: string,
+    profilePic: string,
+    isOnline: boolean,
+    lastSeen:Date,
+    isValidPassword(password: string): Promise<boolean>
+}
+
+
+const userSchema = new Schema<UserType>({
+    name: {
+        type:String,
+        trim:true,
+        required:true,
     },
     email: {
+        type:String,
+        lowercase:true,
+        required:true,
+        unique:true,
+    },
+    bio: {
         type: String,
-        unique: true,
-        required: true,
-        lowercase: true,
-        trim: true,
+        default:""
     },
     password: {
         type:String,
+        required: true,
     },
-    avatar: {
-        type: String,
-        default:"https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png",
+    profilePic:{
+        type:String,
+        default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIwRBD9gNuA2GjcOf6mpL-WuBhJADTWC3QVQ&s"
     },
-    googleId: {
-        type: String,
-        unique: true,
-        sparse: true,
+    isOnline: {
+        type:Boolean,
+        default: false,
     },
-    authProviders: {
-        local:{
-            type: Boolean, 
-            default: false,
-        },
-        google:{
-            type: Boolean,
-            default: false,
-        },
-    },
-    lastSeen:{
+    lastSeen: {
         type:Date,
         default: Date.now,
     },
-    isOnline: {
-        type: Boolean,
-        default: false,
-    },
 }, { timestamps: true});
 
-userSchema.pre('save', async function( this: HydratedDocument<userType>) {
-  if(!this.isModified("password") || !this.password) {
-    return;
-  }
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(this.password, salt);
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) {
+        return;
+    }
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    
 });
 
-const User = model<userType>('users', userSchema);
+userSchema.methods.isValidPassword = async function(password: string): Promise<boolean> {  
+    return compare(password, this.password);
+}
 
-export default User;
+export const User = model<UserType>('users', userSchema);

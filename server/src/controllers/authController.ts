@@ -1,85 +1,67 @@
-import { Request, Response, NextFunction } from "express";
-import User from "../models/userModel.js";
-import ApiError from "../utils/ApiError.js";
+import  type { Request, Response } from "express";
+import { User } from "../models/userModel.js";
 import { registerSchema, loginSchema } from "../utils/authValidation.js";
-import asynchandler from "express-async-handler";
+import ApiError from "../utils/ApiError.js";
+import asyncHandler from 'express-async-handler';
 import { generateToken } from "../utils/generateToken.js";
-import bcrypt from "bcryptjs";
 
-export const register = asynchandler(async (req, res, next) => {
-  const parsed = registerSchema.safeParse(req.body);
 
-  if (!parsed.success) {
-    throw new ApiError(400, "Invalid inputs");
-  }
 
-  const { fullname, email, password } = parsed.data;
-  const isUser = await User.findOne({ email });
-  if (isUser) {
-    return next(new ApiError(409, "User with email already exists"));
-  }
-  const user = await User.create({
-    fullname,
-    email,
-    password,
-    
-    authProviders: {
-      local: true,
-      google: false,
-    },
-  });
-  const token = generateToken({ _id: user._id.toString(), email: user.email });
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-  });
-  res.json({
-    _id: user._id,
-    fullname: user.fullname,
-    email: user.email,
-    avatar: user.avatar,
-  });
+export const register = asyncHandler(async( req: Request, res: Response ) => {
+     const parsedBody = req.body;
+     const result = registerSchema.safeParse(parsedBody);
+     if(!result.success) {
+        throw new ApiError(400, "Please enter valid Inputs");
+     }
+
+     const {name, email, password } = result.data;
+
+     if(!name || !email || !password) {
+        throw new ApiError(400,"Required all feilds");
+     }
+    const isExist = await User.findOne({ email });
+    if(isExist) {
+        throw new ApiError(409,"Email already exists");
+    }
+
+    const user = await User.create({ name, email, password });
+    const token = await generateToken({_id: user._id.toString(), email:user.email});
+    res.cookie('token', token, { httpOnly:true, sameSite:"lax", secure:false});
+    res.json({
+        _id:user._id,
+        name: user.name,
+        email:user.email,
+        profilePic: user.profilePic
+    });
 });
 
-export const login = asynchandler(async (req, res, next) => {
-  const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) {
-    throw new ApiError(400, "Invalid inputs");
-  }
 
-  const { email, password, avatar } = parsed.data;
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new ApiError(401, "Invalid Credentials");
-  }
+export const login = asyncHandler(async(req: Request, res: Response) => {
+    const parsedBody = req.body;
+    const result = loginSchema.safeParse(parsedBody);
+    if(!result.success){
+        throw new ApiError(400, "Please enter valid Inputs")
+    }
+    const { email, password } = result.data;
+    const user = await User.findOne({email}).select('+password');
+    if(!user || !(await user.isValidPassword(password))){
+        throw new ApiError(401, "Incorrect email or password");
+    }
+    const token = await generateToken({_id: user._id.toString(), email:user.email});
+    res.cookie('token', token, { httpOnly:true, sameSite:"lax", secure:false});
+    res.json({
+        _id:user._id,
+        name:user.name,
+        email: user.email,
+        profilePic: user.profilePic,
+        isOnline: user.isOnline,
+        lastseen: user.lastSeen,
+        bio: user.bio,
+    });
 
-  if (!user.authProviders.local) {
-    throw new ApiError(401, "Use google login for this account");
-  }
-  if(!user.password) {
-    throw new Error("Password login not allowed for this account")
-  }
-  const isPassword = await bcrypt.compare(password, user.password!);
-
-  if (!isPassword) {
-    throw new ApiError(401, "Invalid Password");
-  }
-  const token = generateToken({ _id: user._id.toString(), email: user.email });
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-  });
-  res.json({
-    _id: user._id,
-    fullname: user.fullname,
-    email: user.email,
-    avatar: user.avatar,
-  });
 });
 
-export const logout = asynchandler(async(req, res) => {
+export const logout = async(req: Request, res: Response) => {
     res.clearCookie('token');
-    res.json({ message: "Logged out"})
-});
+    res.json({ success: true, message: "Logged out successfully"});
+}
