@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import http from 'node:http'
 import { Server } from 'socket.io';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 dotenv.config();
 
@@ -29,7 +30,7 @@ app.use(express.json());
 connectDB();
 
 app.use('/api/auth', authRoutes);
-
+app.use('/api/user', userRoutes);
 
 app.use(errorMiddleware);
 app.get('/', (req: Request,res: Response) => {
