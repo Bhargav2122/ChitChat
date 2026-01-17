@@ -4,9 +4,9 @@ import  { Schema, model, Document, Types } from "mongoose";
 export interface MessageType extends Document {
     sender:Types.ObjectId,
     text: string,
-    chat:Types.ObjectId,
+    chatId:Types.ObjectId,
     seenby:Types.ObjectId[],
-    unread:Types.ObjectId[],
+    
 }
 
 const messageSchema = new Schema<MessageType>({
@@ -20,7 +20,7 @@ const messageSchema = new Schema<MessageType>({
         trim: true,
         required: true,
     },
-    chat:{
+    chatId:{
         type: Schema.Types.ObjectId,
         ref:"Chat",
         required: true,
