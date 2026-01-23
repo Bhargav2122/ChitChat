@@ -1,12 +1,11 @@
-import {
-  useForm,
-  type FieldErrors,
-  type FieldValues,
-  type UseFormRegister,
+import type {
+
+ FieldErrors,
+   FieldValues,
+  UseFormRegister,
+  Path
 } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { RegisterSchema } from "../validation/authValidation";
-import type { Path } from "react-router-dom";
+
 
 interface BaseFormFields extends FieldValues {
   name?: string;
@@ -37,7 +36,8 @@ const AuthForm = <T extends BaseFormFields>({
       {showName && (
         <div>
           <label>Name</label>
-          <input
+          <input 
+            type="text"
             {...register("name" as Path<T>)}
             placeholder="Enter your name"
           />
@@ -47,7 +47,7 @@ const AuthForm = <T extends BaseFormFields>({
 
       <div>
         <label> Email</label>
-        <input
+        <input type="email"
           {...register("email" as Path<T>)}
           placeholder="email@example.com"
         />
@@ -55,10 +55,10 @@ const AuthForm = <T extends BaseFormFields>({
       </div>
       <div>
         <label>Password</label>
-        <input {...register("password" as Path<T>)} placeholder="*******" />
+        <input type="password" {...register("password" as Path<T>)} placeholder="*******" />
         {errors.password && <p>{errors.password?.message as string}</p>}
       </div>
-      <button type="submit" disabled={loading}>
+      <button type="submit" disabled={loading} className=" cursor-pointer">
         {loading ? "loading..." : submitLabel}
       </button>
     </form>
