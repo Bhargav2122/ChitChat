@@ -14,7 +14,7 @@ export interface User{
     name: string,
     email:string,
     profilePic: string,
-    isOnline:boolean,
-    lastSeen: string,
-    bio:string,
+    isOnline?:boolean,
+    lastSeen?: string,
+    bio?:string,
 }
