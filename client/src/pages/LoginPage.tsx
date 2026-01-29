@@ -58,7 +58,7 @@ const LoginPage = () => {
         />
 
         <p>
-          Don't have account? <Link to="/">register</Link>
+          Don't have account? <Link to="/register">register</Link>
         </p>
       </div>
     </section>

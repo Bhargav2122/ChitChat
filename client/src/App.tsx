@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { ToastContainer  } from "react-toastify";
 
+const HomePage = lazy(() => import("./pages/HomePage"));
 const ChatPage = lazy(() => import ("./pages/ChatPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -14,7 +15,8 @@ const App = () => {
         <Navbar />
         <Suspense fallback={<div className="flex justify-center items-center top-1/2">Loading...</div>}>
           <Routes>
-            <Route path="/" element={<RegisterPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/chat" element={<ChatPage />} />
           </Routes>

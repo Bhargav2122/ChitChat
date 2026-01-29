@@ -7,6 +7,7 @@ import { updateLatestMessage } from "../features/chat/chatSlice";
 
 export const useSocket = () => {
     const dispatch = useAppDispatch();
+    
     useEffect(() => {
         const socket = socketService.connect();
 
