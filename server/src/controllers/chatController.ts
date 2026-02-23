@@ -9,7 +9,7 @@ export const accessChat = asyncHandler( async(req: Request,res:Response) => {
      const { userId } = req.body;
      const currentUserId = req.user.id;
 
-     if(!userId) {
+     if(!userId) {  
         throw new ApiError(400, "UserId required");
      }
 
@@ -46,9 +46,10 @@ export const createGroupChat = asyncHandler(async( req: Request, res: Response) 
         isGroup: true,
         users,
     });
-    const fullChat = await Chat.findOne(groupChat._id).populate("users", "-password");
+    const fullChat = await Chat.findById(groupChat._id).populate("users", "-password");
     res.status(200).json(fullChat);
 });
+/* Friends = users you have chat with */
 
 export const getFriendsList = asyncHandler(async(req: Request, res: Response) => {
     const userId = req.user.id;

@@ -47,6 +47,8 @@ const userSchema = new Schema<UserType>({
     },
 }, { timestamps: true});
 
+userSchema.index({ name: "text", email: "text"})
+
 userSchema.pre('save', async function () {
     if (!this.isModified('password')) {
         return;
@@ -60,4 +62,4 @@ userSchema.methods.isValidPassword = async function(password: string): Promise<b
     return compare(password, this.password);
 }
 
-export const User = model<UserType>('users', userSchema);
+export const User = model<UserType>('User', userSchema);

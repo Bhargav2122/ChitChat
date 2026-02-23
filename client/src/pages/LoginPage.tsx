@@ -1,14 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import AuthForm from "../components/AuthForm";
 import {
-  LoginSchema,
+  loginSchema,
   type LoginInput,
 } from "../validation/authValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useAppDispatch } from "../app/hooks";
-import { signin } from "../features/auth/authSlice";
+import {login } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
 const LoginPage = () => {
@@ -16,7 +16,7 @@ const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(LoginSchema) });
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
   const [loading, setLoading] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -27,7 +27,7 @@ const LoginPage = () => {
     if (loading) return;
     try {
       setLoading(true);
-      await dispatch(signin(data)).unwrap();
+      await dispatch(login(data)).unwrap();
       toast.success("Account created successfully", {
         position: "bottom-center",
         autoClose: 3000,

@@ -1,14 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import AuthForm from "../components/AuthForm";
 import {
-  RegisterSchema,
+  registerSchema,
   type RegisterInput,
 } from "../validation/authValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useAppDispatch } from "../app/hooks";
-import { signup } from "../features/auth/authSlice";
+import { registerUser } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
 const RegisterPage = () => {
@@ -16,7 +16,7 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterInput>({ resolver: zodResolver(RegisterSchema) });
+  } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) });
   const [loading, setLoading] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -27,7 +27,7 @@ const RegisterPage = () => {
     if (loading) return;
     try {
       setLoading(true);
-      await dispatch(signup(data)).unwrap();
+      await dispatch(registerUser(data)).unwrap();
       toast.success("Account created successfully", {
         position: "top-right",
         autoClose: 3000,

@@ -1,56 +1,66 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { MessageState } from "../../types/ChatTypes";
+import type { MessageType } from "../../types/messageType";
 import api from "../../api/api";
 
-
-const initialState: MessageState = {
-    messages:[],
-    loading: false,
-    error: null,
-    typing:{},
+export interface MessageState {
+    messages: MessageType[],
+    loading: boolean,
+    error: string | null,
+    typing: {
+        [chatId: string]: string[];
+    };
 }
 
-export const fetchMessages = createAsyncThunk('message/fetchmessage', async(chatId:string, thunkAPI) => {
-    try{
-        const { data } = await api.get(`/api/messages/${chatId}`);
-        return data;
-    }catch(err: any) {
+export const fetchMessages = createAsyncThunk('message/fetchmessages', async(chatId: string, thunkAPI) => {
+   try {
+     const res = await api.get(`/message/${chatId}`);
+     console.log(res.data);
+     return res.data;
+   } catch (err: any) {
     return thunkAPI.rejectWithValue(err.response?.data?.msg || err.message);
-  }
+   }
 })
 
-export const sendMessage = createAsyncThunk('message/sendmessage', async({chatId, text}: {chatId: string; text: string}, thunkAPI) => {
+export const sendMessage = createAsyncThunk('message/sendmessage', async({chatId, text} : {chatId: string; text: string}, thunkAPI) => {
     try {
-        const { data } = await api.post('/api/messages', {chatId, text});
-        return data;
-    }catch(err: any) {
-    return thunkAPI.rejectWithValue(err.response?.data?.msg || err.message);
-  }
+        const res = await api.post('/message', {chatId, text});
+        console.log(res.data);
+        return res.data;
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(err.response?.data?.msg || err.message);
+    }
 })
 
-export const markMessagesSeen = createAsyncThunk('message/markseen', async(chatId: string, thunkAPI) => {
+export const markMessageSeen = createAsyncThunk('message/markseen', async(chatId:string, thunkAPI) => {
     try {
-        await api.put('/messages/seen',{chatId});
+        await api.put('/message/seen', { chatId });
         return chatId;
-    }catch(err: any) {
-    return thunkAPI.rejectWithValue(err.response?.data?.msg || err.message);
-  }
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(err.response?.data?.msg || err.message);
+    }
 })
+
+const initialState : MessageState = {
+    messages: [],
+    loading: false,
+    error: null,
+    typing: {},
+}
 
 const messageSlice = createSlice({
-    name:'message',
-    initialState,
+    name: 'message',
+    initialState, 
     reducers: {
         addMessage:(s,a) => {
-            const exists = s.messages.find((m) => m._id === a.payload._id);
-            if(!exists) {
-                s.messages.push(a.payload);
-            }
+           const exists = s.messages.find((m) => m._id === a.payload._id);
+           if(!exists) {
+            s.messages.push(a.payload);
+           }
         },
-        clearMessages:(s) => {
+        clearMessage: (s) => {
             s.messages = [];
         },
-        setTyping:(s,a) => {
+        setTyping: (s,a) => {
             const {chatId, userId} = a.payload;
             if(!s.typing[chatId]) {
                 s.typing[chatId] = [];
@@ -59,48 +69,43 @@ const messageSlice = createSlice({
                 s.typing[chatId].push(userId);
             }
         },
-        removeTyping:(s,a) => {
+        removeTyping: (s,a) => {
             const { chatId, userId } = a.payload;
             if(s.typing[chatId]) {
                 s.typing[chatId] = s.typing[chatId].filter((id) => id !== userId);
             }
         },
-        updateMessageSeen: (s, a) => {
+        updateMessageSeen : (s, a) => {
             const { userId } = a.payload;
             s.messages.forEach((message) => {
-                if(!message.seenby.includes(userId)){
+                if(!message.seenby.includes(userId)) {
                     message.seenby.push(userId);
                 }
-            });
+            })
         },
-        clearError: (s) => {
-                s.error = null;
-        }
     },
-
-    extraReducers:(b) => {
-    
-        b.addCase(fetchMessages.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        })
-        .addCase(fetchMessages.fulfilled, (state, action) => {
-        state.loading = false;
-        state.messages = action.payload;
-        })
-        .addCase(fetchMessages.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-        })
-        .addCase(sendMessage.fulfilled, (state, action) => {
-      const exists = state.messages.find((m) => m._id === action.payload._id);
-      if (!exists) {
-        state.messages.push(action.payload);
-      }
-    });
+    extraReducers: (b) => {
+        b
+         .addCase(fetchMessages.pending, (s) => {
+            s.loading = true;
+            s.error = null;
+         })
+         .addCase(fetchMessages.fulfilled, (s,a) => {
+            s.loading = false;
+            s.messages = a.payload;
+         })
+         .addCase(fetchMessages.rejected, (s, a) => {
+            s.loading = false;
+            s.error = a.payload as string;
+         })
+         .addCase(sendMessage.fulfilled, (s,a) => {
+            const exists = s.messages.find((m) => m._id === a.payload._id);
+            if(!exists) {
+                s.messages.push(a.payload);
+            }
+         })
     }
 })
 
-export const { addMessage, clearMessages, setTyping, removeTyping, updateMessageSeen, clearError} = messageSlice.actions;
-
+export const { addMessage, clearMessage, setTyping, removeTyping, updateMessageSeen} = messageSlice.actions;
 export default messageSlice.reducer;

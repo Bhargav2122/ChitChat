@@ -1,4 +1,6 @@
 import { Schema, model, Document, Types } from "mongoose";
+import { User } from "./userModel.js";
+import {Message} from './messageSchema.js';
 
 export interface ChatType extends Document {
   chatName?: string;
@@ -35,4 +37,4 @@ const chatSchema = new Schema<ChatType>(
 );
 
 chatSchema.index({ updatedAt: -1 });
-export const Chat = model<ChatType>("chats", chatSchema);
+export const Chat = model<ChatType>("Chat", chatSchema);

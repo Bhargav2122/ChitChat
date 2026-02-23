@@ -5,6 +5,7 @@ import { Message } from "../models/messageSchema.js";
 import { Chat } from "../models/chatModel.js";
 
 
+
 export const sendMessage = asyncHandler(async(req: Request, res: Response) => {
     const {chatId, text } = req.body;
     const senderId = req.user.id;
@@ -20,7 +21,7 @@ export const sendMessage = asyncHandler(async(req: Request, res: Response) => {
     });
 
      await Chat.findByIdAndUpdate(chatId, { latestMessage: message._id});
-     const fullMessage = await Message.findById(message._id).populate("sender", "name email").populate("chatId");
+     const fullMessage = await Message.findById(message._id).populate("sender", "name email");
      res.status(200).json(fullMessage);
 });
 
@@ -34,4 +35,19 @@ export const getMessages = asyncHandler(async(req: Request, res: Response) => {
     res.json(messages);
 });
 
+/* Mark message as seen */
 
+export const markMessageSeen = asyncHandler(async(req: Request, res: Response)=> {
+    const { chatId } = req.body;
+    const userId = req.user.id;
+    
+    await Message.updateMany({
+        chatId,
+        seenby: { $ne: userId},
+       },
+       {
+        $push: { seenby: userId},
+       }
+    );
+    res.json({ success: true});
+})

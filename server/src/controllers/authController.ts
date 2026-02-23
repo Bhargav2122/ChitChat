@@ -25,10 +25,10 @@ export const register = asyncHandler(async( req: Request, res: Response ) => {
     }
 
     const user = await User.create({ name, email, password });
-    const token = await generateToken({id: user._id.toString(), email:user.email});
+    const token =  generateToken({id: user._id.toString(), email:user.email});
     res.cookie('token', token, { httpOnly:true, sameSite:"lax", secure:false});
     res.json({
-        id:user._id,
+        _id:user._id,
         name: user.name,
         email:user.email,
         profilePic: user.profilePic
@@ -50,7 +50,7 @@ export const login = asyncHandler(async(req: Request, res: Response) => {
     const token = await generateToken({id: user._id.toString(), email:user.email});
     res.cookie('token', token, { httpOnly:true, sameSite:"lax", secure:false});
     res.json({
-        id:user._id,
+        _id:user._id,
         name:user.name,
         email: user.email,
         profilePic: user.profilePic,

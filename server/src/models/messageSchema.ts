@@ -1,4 +1,6 @@
 import  { Schema, model, Document, Types } from "mongoose";
+import { User } from "./userModel.js";
+import { Chat } from "./chatModel.js";
 
 
 export interface MessageType extends Document {
@@ -33,6 +35,6 @@ const messageSchema = new Schema<MessageType>({
 
 }, { timestamps: true })
 
-messageSchema.index({chat: 1, createdAt: 1});
+messageSchema.index({chatId: 1, createdAt: 1});
 
-export const Message = model<MessageType>("messages", messageSchema);
+export const Message = model<MessageType>("Message", messageSchema);
